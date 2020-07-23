@@ -1,14 +1,14 @@
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
-import Home from '@/ui/Home.vue';
+import CardsGame from '@/ui/cards-game/CardsGame.vue';
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
     path: '/',
-    name: 'Home',
-    component: Home,
+    name: 'CardsGame',
+    component: CardsGame,
   },
 ];
 

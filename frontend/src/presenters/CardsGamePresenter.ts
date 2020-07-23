@@ -1,4 +1,4 @@
-export  class HomePresenter {
+export default class CardsGamePresenter {
   private _solution: number[];
   private _userSolution: number[];
   state: UIState;
@@ -8,7 +8,7 @@ export  class HomePresenter {
       type: 'INITIAL',
       allowedDifficultyLevels: [1, 2, 3],
       difficultyLevel: 1,
-      cards: generateCards(1),
+      cards: generateCards(3),
     }
     this._userSolution = [];
     this._solution = generateSolution(this.state.cards);
@@ -47,6 +47,7 @@ export  class HomePresenter {
         ...card,
         state: 'VALUE_SIDE'
       }
+      // this is a side effect that could be managed better managed with observables.
       const cards = [...this.state.cards.slice(0, index), flippedCard, ...this.state.cards.slice(index + 1)]
       this._decidePlayingOrFinishState(cards)
     }
@@ -91,7 +92,7 @@ function generateCardNumber(): number {
  */
 function generateCards(difficultyLevel: DifficultyLevel): Card[] {
   const cardsCount = getCardsCount(difficultyLevel)
-  const cards = Array(cardsCount)
+  const cards = Array(cardsCount).fill(undefined);
   return cards.map(() => {
     return {
       value: generateCardNumber(),
