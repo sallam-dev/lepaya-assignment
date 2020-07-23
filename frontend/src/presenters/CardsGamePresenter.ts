@@ -79,7 +79,7 @@ export default class CardsGamePresenter {
 /**
  * Generate a random positive integer between 1 and 100
  */
-function generateCardNumber(): number {
+function generateRandomInt(): number {
   const min = 1;
   const max = 100
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -92,10 +92,21 @@ function generateCardNumber(): number {
  */
 function generateCards(difficultyLevel: DifficultyLevel): Card[] {
   const cardsCount = getCardsCount(difficultyLevel)
-  const cards = Array(cardsCount).fill(undefined);
-  return cards.map(() => {
+  const cardValues: number[] = []
+  function getUniqueNumber(): number {
+    const value = generateRandomInt();
+    if(cardValues.includes(value)) {
+      return getUniqueNumber();
+    } else {
+      return value
+    }
+  }
+  for (let i = 0; i < cardsCount; i++) {
+    cardValues.push(getUniqueNumber())
+  }
+  return cardValues.map((value) => {
     return {
-      value: generateCardNumber(),
+      value,
       state: 'INITIAL'
     }
   })
