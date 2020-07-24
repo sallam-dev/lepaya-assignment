@@ -36,7 +36,9 @@ function generateCards(difficultyLevel: DifficultyLevel): number[] {
 }
 
 function generateSolution(cards: number[]): number[] {
-  return cards.sort((a, b) => a - b);
+  const cardsCopy = cards.slice();
+  cardsCopy.sort((a, b) => a - b);
+  return cardsCopy;
 }
 
 function getCardsCount(difficultyLevel: DifficultyLevel): CardsCount {

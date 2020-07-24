@@ -3,16 +3,21 @@ import express from 'express';
 import http from 'http';
 import history from 'connect-history-api-fallback';
 import {
-  RequestHandler,
   createJSONResponse,
   createBadRequestResponse,
   ServerResponse,
-} from '../models/server-requests';
+  StaticFilesOptions,
+  SPARegistrationRoutes,
+  Server,
+  HandlerRegistrationOptions,
+} from '../models/server';
+import bodyParser from 'body-parser';
 
 export function createServer(options: ServerOptions): Server {
   const _port = options.port;
   const _app = express();
   let _httpServer: http.Server;
+  _app.use(bodyParser.json());
 
   const server: Server = {
     async init(): Promise<void> {
@@ -51,8 +56,7 @@ export function createServer(options: ServerOptions): Server {
           _app.post(options.path, async function jsonHandler(req, res) {
             let response: ServerResponse;
             try {
-              const payload = JSON.parse(req.body);
-              const result = await handler(payload);
+              const result = await handler(req.body);
               response = createJSONResponse(result);
             } catch (err) {
               response = createBadRequestResponse(err);
@@ -88,23 +92,3 @@ export function createServer(options: ServerOptions): Server {
 type ServerOptions = {
   port: number;
 };
-
-type Server = {
-  registerJSONHandler(options: HandlerRegistrationOptions): Server;
-  registerSPARoutes(routes: SPARegistrationRoutes): Server;
-  useStatic(options: StaticFilesOptions): Server;
-  init(): Promise<void>;
-  shutdown(): Promise<void>;
-};
-type HandlerRegistrationOptions = {
-  handler: RequestHandler;
-  path: string;
-  method: 'POST';
-};
-type StaticFilesOptions = {
-  root: string;
-};
-type SPARegistrationRoutes = Array<{
-  url: string;
-  htmlPath: string;
-}>;

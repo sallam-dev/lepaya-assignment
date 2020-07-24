@@ -3,7 +3,7 @@ import { logger } from './utilities/logger';
 import { processGameCardsGenerationRequest } from './processors/game-card-generation';
 
 (async function main() {
-  const server = createServer({ port: 9009 });
+  const server = createServer({ port: 9090 });
 
   async function shutdown() {
     try {

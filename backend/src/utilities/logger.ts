@@ -3,9 +3,9 @@ function logPrefix(prefix: string) {
 }
 export const logger = {
   info(message: unknown): void {
-    console.log(`${logPrefix('INFO')} ${String(message)}`);
+    console.log(`${logPrefix('[INFO]')} ${String(message)}`);
   },
   error(message: unknown): void {
-    console.error(`${logPrefix('ERROR')} ${String(message)}`);
+    console.error(`${logPrefix('[ERROR]')} ${String(message)}`);
   },
 };
