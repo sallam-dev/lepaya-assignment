@@ -1,26 +1,22 @@
 export class CardsGamePresenter {
-  private _solution: number[];
+  private _solution: number[] = [];
+  private _userSolution: number[] = [];
 
-  private _userSolution: number[];
-
-  state: UIState;
+  state: GameCardState;
 
   constructor() {
     this.state = {
       type: 'INITIAL',
       allowedDifficultyLevels: [1, 2, 3],
       difficultyLevel: 1,
-      cards: generateCards(3),
+      cards: generateCards(1),
+      disableGameSettings: false,
+      hideGameResult: true,
     };
-    this._userSolution = [];
     this._solution = generateSolution(this.state.cards);
   }
 
-  /**
-   * difficulty levels can only be set when at the initial state
-   */
   selectDifficultyLevel(level: DifficultyLevel): void {
-    console.log(level);
     this._setState({
       ...this.state,
       difficultyLevel: level,
@@ -35,18 +31,34 @@ export class CardsGamePresenter {
       type: 'PLAYING',
       cards: this.state.cards.map((card) => ({
         ...card,
-        state: 'BLANK_SIDE',
+        covered: true,
       })),
+      disableGameSettings:true,
+      hideGameResult: true,
     });
+  }
+
+  playAgain(): void {
+    this._setState({
+      type: 'INITIAL',
+      allowedDifficultyLevels: [1, 2, 3],
+      difficultyLevel: 1,
+      cards: generateCards(1),
+      disableGameSettings: false,
+      hideGameResult: true,
+    })
+    this._userSolution = [];
+    this._solution = generateSolution(this.state.cards);
+
   }
 
   flipCard(index: number): void {
     const card = this.state.cards[index];
-    if (card.state != 'VALUE_SIDE') {
+    if (card.covered) {
       this._userSolution.push(card.value);
       const flippedCard: Card = {
         ...card,
-        state: 'VALUE_SIDE',
+        covered: false,
       };
       // this is a side effect that could be managed better managed with observables.
       const cards = [...this.state.cards.slice(0, index), flippedCard, ...this.state.cards.slice(index + 1)];
@@ -55,13 +67,15 @@ export class CardsGamePresenter {
   }
 
   private _decidePlayingOrFinishState(cards: Card[]): void {
-    if (cards.length === this._solution.length) {
+    if (cards.length === this._userSolution.length) {
       const isWin = this._userSolution.every((value, index) => value === this._solution[index]);
       this._setState({
         ...this.state,
         type: 'FINISHED',
         cards,
         isWin,
+        disableGameSettings: true,
+        hideGameResult: false,
       });
     } else {
       this._setState({
@@ -71,7 +85,7 @@ export class CardsGamePresenter {
     }
   }
 
-  private _setState(newState: UIState): void {
+  private _setState(newState: GameCardState): void {
     this.state = newState;
   }
 }
@@ -105,7 +119,7 @@ function generateCards(difficultyLevel: DifficultyLevel): Card[] {
   }
   return cardValues.map((value) => ({
     value,
-    state: 'INITIAL',
+    covered: false,
   }));
 }
 
@@ -132,32 +146,37 @@ function getCardsCount(difficultyLevel: DifficultyLevel): CardsCount {
 }
 
 export type DifficultyLevel = 1 | 2 | 3;
-type CardsCount = 4 | 8 | 12;
-type Card = {
+export type Card = {
   value: number;
-  state: CardState;
+  covered: boolean;
 }
-type CardState = 'INITIAL' | 'BLANK_SIDE' | 'VALUE_SIDE'
 
-type InitialUIState = {
+type CardsCount = 4 | 8 | 12;
+
+
+type CommonState = {
+  type: string;
+  cards: Card[];
+  difficultyLevel: DifficultyLevel;
+  allowedDifficultyLevels: DifficultyLevel[];
+  disableGameSettings: boolean;
+  hideGameResult: boolean;
+}
+type InitialState = CommonState & {
   type: 'INITIAL';
-  cards: Card [];
-  difficultyLevel: DifficultyLevel;
-  allowedDifficultyLevels: DifficultyLevel[];
+  disableGameSettings: false;
+  hideGameResult: true;
 }
-type PlayingUIState = {
+type PlayingState = CommonState & {
   type: 'PLAYING';
-  cards: Card [];
-  difficultyLevel: DifficultyLevel;
-  allowedDifficultyLevels: DifficultyLevel[];
+  disableGameSettings: true;
+  hideGameResult: true;
 }
-
-type FinishedUIState = {
+type FinishedState = CommonState & {
   type: 'FINISHED';
-  cards: Card [];
-  difficultyLevel: DifficultyLevel;
-  allowedDifficultyLevels: DifficultyLevel[];
+  disableGameSettings: true;
+  hideGameResult: false;
   isWin: boolean;
 }
 
-type UIState = InitialUIState | PlayingUIState | FinishedUIState;
+export type GameCardState = InitialState | PlayingState | FinishedState
