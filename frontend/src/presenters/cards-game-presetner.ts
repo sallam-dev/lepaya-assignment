@@ -1,3 +1,5 @@
+import { Card, DifficultyLevel, CardsCount } from '@/models/cards-game';
+
 export class CardsGamePresenter {
   private _solution: number[] = [];
   private _userSolution: number[] = [];
@@ -144,15 +146,6 @@ function getCardsCount(difficultyLevel: DifficultyLevel): CardsCount {
       throw new Error('Unsupported difficulty level, please choose a difficulty level from 1 to 3');
   }
 }
-
-export type DifficultyLevel = 1 | 2 | 3;
-export type Card = {
-  value: number;
-  covered: boolean;
-}
-
-type CardsCount = 4 | 8 | 12;
-
 
 type CommonState = {
   type: string;
