@@ -2,6 +2,7 @@ import { logger } from '../utilities/logger';
 import express from 'express';
 import http from 'http';
 import history from 'connect-history-api-fallback';
+import cors from 'cors';
 import {
   createJSONResponse,
   createBadRequestResponse,
@@ -18,6 +19,8 @@ export function createServer(options: ServerOptions): Server {
   const _app = express();
   let _httpServer: http.Server;
   _app.use(bodyParser.json());
+  _app.use(cors());
+
 
   const server: Server = {
     async init(): Promise<void> {

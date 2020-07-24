@@ -1,175 +1,170 @@
-import { Card, DifficultyLevel, CardsCount } from '@/models/cards-game';
+import { DifficultyLevel, CardsCount } from '@/models/cards-game';
+import { cardsGameRepo } from '@/repositories/cards-game/cards-game-repo';
 
-export class CardsGamePresenter {
-  private _solution: number[] = [];
-  private _userSolution: number[] = [];
+export function createCardGamePresenter(): CardGamePresenter {
+  let _observers: Function[] = [];
+  let _state: CardsGameState = {
+    type: 'INITIAL_LOADING',
+  };
+  let _solution: number[] = [];
+  const _difficultySelections: DifficultySelections = [
+    { level: 1, cardsCount: 4 },
+    { level: 2, cardsCount: 8 },
+    { level: 3, cardsCount: 12 },
+  ];
+  const _initialDifficulty = 1;
 
-  state: GameCardState;
-
-  constructor() {
-    this.state = {
-      type: 'INITIAL',
-      allowedDifficultyLevels: [1, 2, 3],
-      difficultyLevel: 1,
-      cards: generateCards(1),
-      disableGameSettings: false,
-      hideGameResult: true,
-    };
-    this._solution = generateSolution(this.state.cards);
+  function _notifySubscribers() {
+    _observers.forEach(fn => fn(_state));
   }
 
-  selectDifficultyLevel(level: DifficultyLevel): void {
-    this._setState({
-      ...this.state,
-      difficultyLevel: level,
-      cards: generateCards(level),
-    });
-    this._solution = generateSolution(this.state.cards);
+  function _setState(newState: CardsGameState) {
+    _state = newState;
+    _notifySubscribers();
   }
 
-  play(): void {
-    this._setState({
-      ...this.state,
-      type: 'PLAYING',
-      cards: this.state.cards.map((card) => ({
-        ...card,
-        covered: true,
-      })),
-      disableGameSettings:true,
-      hideGameResult: true,
-    });
-  }
-
-  playAgain(): void {
-    this._setState({
-      type: 'INITIAL',
-      allowedDifficultyLevels: [1, 2, 3],
-      difficultyLevel: 1,
-      cards: generateCards(1),
-      disableGameSettings: false,
-      hideGameResult: true,
-    })
-    this._userSolution = [];
-    this._solution = generateSolution(this.state.cards);
-
-  }
-
-  flipCard(index: number): void {
-    const card = this.state.cards[index];
-    if (card.covered) {
-      this._userSolution.push(card.value);
-      const flippedCard: Card = {
-        ...card,
+  async function _loadCards(difficultyLevel: DifficultyLevel): Promise<Card[]> {
+    const gameCards = await cardsGameRepo.getNewCards(difficultyLevel);
+    _solution = gameCards.solution;
+    return gameCards.cards.map(value => {
+      return {
+        value,
         covered: false,
       };
-      // this is a side effect that could be managed better managed with observables.
-      const cards = [...this.state.cards.slice(0, index), flippedCard, ...this.state.cards.slice(index + 1)];
-      this._decidePlayingOrFinishState(cards);
-    }
+    });
   }
-
-  private _decidePlayingOrFinishState(cards: Card[]): void {
-    if (cards.length === this._userSolution.length) {
-      const isWin = this._userSolution.every((value, index) => value === this._solution[index]);
-      this._setState({
-        ...this.state,
-        type: 'FINISHED',
+  function _decideWinning(cards: Card[], userSolution: number[]): void {
+    const currentState = _state as HydratedState;
+    if (userSolution.length === _solution.length) {
+      const isWin = currentState.userSolution.every((value, index) => value === _solution[index]);
+      _setState({
+        ...currentState,
         cards,
         isWin,
-        disableGameSettings: true,
         hideGameResult: false,
+        userSolution,
       });
     } else {
-      this._setState({
-        ...this.state,
+      _setState({
+        ...currentState,
+        userSolution,
         cards,
       });
     }
   }
 
-  private _setState(newState: GameCardState): void {
-    this.state = newState;
-  }
+  const presenter: CardGamePresenter = {
+    get state(): CardsGameState {
+      return _state;
+    },
+    async init(): Promise<void> {
+      const cards = await _loadCards(_initialDifficulty);
+      _setState({
+        type: 'HYDRATED',
+        cards,
+        selectedDifficultyLevel: _initialDifficulty,
+        difficultySelections: _difficultySelections,
+        disableGameSettings: false,
+        hideGameResult: true,
+        userSolution: [],
+        isWin: false,
+      });
+    },
+    async selectDifficulty(level: DifficultyLevel): Promise<void> {
+      const cards = await _loadCards(level);
+      _setState({
+        ...(_state as HydratedState),
+        disableGameSettings: false,
+        cards,
+      });
+    },
+    play(): void {
+      const currentState = _state as HydratedState;
+      _setState({
+        ...currentState,
+        cards: currentState.cards.map(card => {
+          return {
+            ...card,
+            covered: true,
+          };
+        }),
+        disableGameSettings: true,
+      });
+    },
+    flipCard(index: number): void {
+      const currentState = _state as HydratedState;
+      const card = currentState.cards[index];
+      if (card.covered) {
+        const userSolution = [...currentState.userSolution, card.value];
+        const flippedCard: Card = {
+          ...card,
+          covered: false,
+        };
+        const cards = [
+          ...currentState.cards.slice(0, index),
+          flippedCard,
+          ...currentState.cards.slice(index + 1),
+        ];
+        _decideWinning(cards, userSolution);
+      }
+    },
+    async startOver(): Promise<void> {
+
+      const cards = await _loadCards(_initialDifficulty);
+      _setState({
+        ...(_state as HydratedState),
+        cards,
+        userSolution: [],
+        selectedDifficultyLevel: _initialDifficulty,
+        disableGameSettings: false,
+        hideGameResult: true,
+        isWin: false,
+      });
+    },
+
+    subscribe(observer: (state: CardsGameState) => void): void {
+      _observers.push(observer);
+    },
+    destroy(): void {
+      _observers = [];
+    },
+  };
+  return presenter;
 }
 
-/**
- * Generate a random positive integer between 1 and 100
- */
-function generateRandomInt(): number {
-  const min = 1;
-  const max = 100;
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+type CardGamePresenter = {
+  init(): Promise<void>;
+  selectDifficulty(level: DifficultyLevel): Promise<void>;
+  play(): void;
+  startOver(): Promise<void>;
+  flipCard(index: number): void;
+  subscribe(fn: (state: CardsGameState) => void): void;
+  destroy(): void;
+  state: CardsGameState;
+};
 
-/**
- * Generate an array of cards given a difficulty level
- * available difficulty levels are, 1 (4 cards), 2 (8 cards), 3 (12 cards)
- * @param {number} difficultyLevel value from 1 (easiest) to 3 (hardest)
- */
-function generateCards(difficultyLevel: DifficultyLevel): Card[] {
-  const cardsCount = getCardsCount(difficultyLevel);
-  const cardValues: number[] = [];
-  function getUniqueNumber(): number {
-    const value = generateRandomInt();
-    if (cardValues.includes(value)) {
-      return getUniqueNumber();
-    }
-    return value;
-  }
-  for (let i = 0; i < cardsCount; i++) {
-    cardValues.push(getUniqueNumber());
-  }
-  return cardValues.map((value) => ({
-    value,
-    covered: false,
-  }));
-}
+type DifficultySelections = Array<{
+  level: DifficultyLevel;
+  cardsCount: CardsCount;
+}>;
 
-function generateSolution(cards: Card[]): number[] {
-  const values = cards.map((card) => card.value);
-  return values.sort((a, b) => a - b);
-}
+export type Card = {
+  value: number;
+  covered: boolean;
+};
 
-/**
- * returns the number of cards for each difficulty level
- * @param {number} difficultyLevel value from 1 (easiest) to 3 (hardest)
- */
-function getCardsCount(difficultyLevel: DifficultyLevel): CardsCount {
-  switch (difficultyLevel) {
-    case 1:
-      return 4;
-    case 2:
-      return 8;
-    case 3:
-      return 12;
-    default:
-      throw new Error('Unsupported difficulty level, please choose a difficulty level from 1 to 3');
-  }
-}
-
-type CommonState = {
-  type: string;
+export type InitialLoadingState = {
+  type: 'INITIAL_LOADING';
+};
+export type HydratedState = {
+  type: 'HYDRATED';
   cards: Card[];
-  difficultyLevel: DifficultyLevel;
-  allowedDifficultyLevels: DifficultyLevel[];
+  userSolution: number[];
+  selectedDifficultyLevel: number;
+  difficultySelections: DifficultySelections;
   disableGameSettings: boolean;
   hideGameResult: boolean;
-}
-type InitialState = CommonState & {
-  type: 'INITIAL';
-  disableGameSettings: false;
-  hideGameResult: true;
-}
-type PlayingState = CommonState & {
-  type: 'PLAYING';
-  disableGameSettings: true;
-  hideGameResult: true;
-}
-type FinishedState = CommonState & {
-  type: 'FINISHED';
-  disableGameSettings: true;
-  hideGameResult: false;
   isWin: boolean;
-}
+};
 
-export type GameCardState = InitialState | PlayingState | FinishedState
+export type CardsGameState = HydratedState | InitialLoadingState;
