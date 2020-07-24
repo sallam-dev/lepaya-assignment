@@ -1,6 +1,9 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "memory-game-frontend",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "web frontend for memory game",
+  "author": "Mohamed Sallam",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
