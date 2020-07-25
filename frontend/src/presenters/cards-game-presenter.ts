@@ -2,11 +2,6 @@ import { DifficultyLevel, CardsCount } from '@/models/cards-game';
 import { cardsGameRepo } from '@/repositories/cards-game/cards-game-repo';
 
 export function createCardGamePresenter(): CardGamePresenter {
-  let _observers: Function[] = [];
-  let _state: CardsGameState = {
-    type: 'INITIAL_LOADING',
-  };
-  let _solution: number[] = [];
   const _difficultySelections: DifficultySelections = [
     { level: 1, cardsCount: 4 },
     { level: 2, cardsCount: 8 },
@@ -14,24 +9,19 @@ export function createCardGamePresenter(): CardGamePresenter {
   ];
   const _initialDifficulty = 1;
 
+  let _observers: Function[] = [];
+  let _state: CardsGameState = {
+    type: 'INITIAL_LOADING',
+  };
+  let _solution: number[] = [];
+
+
   function _notifySubscribers() {
     _observers.forEach(fn => fn(_state));
   }
-
   function _setState(newState: CardsGameState) {
     _state = newState;
     _notifySubscribers();
-  }
-
-  async function _loadCards(difficultyLevel: DifficultyLevel): Promise<Card[]> {
-    const gameCards = await cardsGameRepo.getNewCards(difficultyLevel);
-    _solution = gameCards.solution;
-    return gameCards.cards.map(value => {
-      return {
-        value,
-        covered: false,
-      };
-    });
   }
   function _decideWinning(cards: Card[], userSolution: number[]): void {
     const currentState = _state as HydratedState;
@@ -52,32 +42,49 @@ export function createCardGamePresenter(): CardGamePresenter {
       });
     }
   }
+  function _initialState(cards: Card[]): CardsGameState {
+    return {
+      type: 'HYDRATED',
+      cards,
+      selectedDifficultyLevel: _initialDifficulty,
+      difficultySelections: _difficultySelections,
+      disableGameSettings: false,
+      hideGameResult: true,
+      userSolution: [],
+      isWin: false,
+    }
+  }
+  async function _loadCards(difficultyLevel: DifficultyLevel): Promise<Card[]> {
+    const gameCards = await cardsGameRepo.getNewCards(difficultyLevel);
+    _solution = gameCards.solution;
+    return gameCards.cards.map(value => {
+      return {
+        value,
+        covered: false,
+      };
+    });
+  }
 
   const presenter: CardGamePresenter = {
     get state(): CardsGameState {
       return _state;
     },
+
     async init(): Promise<void> {
       const cards = await _loadCards(_initialDifficulty);
-      _setState({
-        type: 'HYDRATED',
-        cards,
-        selectedDifficultyLevel: _initialDifficulty,
-        difficultySelections: _difficultySelections,
-        disableGameSettings: false,
-        hideGameResult: true,
-        userSolution: [],
-        isWin: false,
-      });
+      _setState(_initialState(cards));
     },
+
     async selectDifficulty(level: DifficultyLevel): Promise<void> {
       const cards = await _loadCards(level);
       _setState({
         ...(_state as HydratedState),
         disableGameSettings: false,
+        selectedDifficultyLevel: level,
         cards,
       });
     },
+
     play(): void {
       const currentState = _state as HydratedState;
       _setState({
@@ -91,6 +98,7 @@ export function createCardGamePresenter(): CardGamePresenter {
         disableGameSettings: true,
       });
     },
+
     flipCard(index: number): void {
       const currentState = _state as HydratedState;
       const card = currentState.cards[index];
@@ -108,30 +116,26 @@ export function createCardGamePresenter(): CardGamePresenter {
         _decideWinning(cards, userSolution);
       }
     },
+
     async startOver(): Promise<void> {
       const cards = await _loadCards(_initialDifficulty);
-      _setState({
-        ...(_state as HydratedState),
-        cards,
-        userSolution: [],
-        selectedDifficultyLevel: _initialDifficulty,
-        disableGameSettings: false,
-        hideGameResult: true,
-        isWin: false,
-      });
+      _setState(_initialState(cards));
     },
 
     subscribe(observer: (state: CardsGameState) => void): void {
       _observers.push(observer);
     },
+
     destroy(): void {
       _observers = [];
     },
   };
+
   return presenter;
 }
 
 type CardGamePresenter = {
+  state: CardsGameState;
   init(): Promise<void>;
   selectDifficulty(level: DifficultyLevel): Promise<void>;
   play(): void;
@@ -139,7 +143,6 @@ type CardGamePresenter = {
   flipCard(index: number): void;
   subscribe(fn: (state: CardsGameState) => void): void;
   destroy(): void;
-  state: CardsGameState;
 };
 
 type DifficultySelections = Array<{
