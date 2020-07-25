@@ -15,11 +15,14 @@
             v-for="selection in state.difficultySelections"
             :value="selection.level"
             :key="selection.level"
-            >{{ selection.level }} ({{ selection.cardsCount }} cards)</option
           >
+            {{ selection.level }} ({{ selection.cardsCount }} cards)
+          </option>
         </select>
         <div>
-          <button type="submit" :disabled="state.disableGameSettings">Play</button>
+          <button type="submit" :disabled="state.disableGameSettings">
+            Play
+          </button>
         </div>
       </form>
       <div class="result" :class="resultClasses">

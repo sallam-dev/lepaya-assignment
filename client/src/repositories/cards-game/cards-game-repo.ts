@@ -7,10 +7,7 @@ export const cardsGameRepo = {
     const request: NewCardsRequest = {
       difficultyLevel,
     };
-    const response: NewCardsResponse = await http.post(
-      '/api/new-cards',
-      request
-    );
+    const response: NewCardsResponse = await http.post('/api/new-cards', request);
     return {
       cards: response.cards,
       solution: response.solution,

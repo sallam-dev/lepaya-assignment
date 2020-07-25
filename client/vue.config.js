@@ -4,6 +4,6 @@ module.exports = {
 
   pwa: {
     name: 'Lepaya Memory Game',
-    themeColor: '#FFFFFF'
-  }
+    themeColor: '#FFFFFF',
+  },
 };

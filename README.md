@@ -78,3 +78,4 @@ It's important to note that the backend server is the same server hosting the cl
 - Proper observable implementation for the frontend instead of the ad-hoc one.
 - Better CSS code in the vue components.
 - Might consider SSR depending on the need of the business.
+- Better error handling for the client

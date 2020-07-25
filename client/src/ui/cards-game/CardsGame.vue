@@ -6,7 +6,7 @@
     @play="presenter.play"
     @select-difficulty="presenter.selectDifficulty"
     @start-over="presenter.startOver"
-  ></component>
+  />
 </template>
 
 <script lang="ts">
