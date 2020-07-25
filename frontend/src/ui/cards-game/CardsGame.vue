@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import Vue, { Component } from 'vue';
-import { createCardGamePresenter, CardsGameState } from '../../presenters/cards-game-presetner';
+import { createCardGamePresenter, CardsGameState } from '../../presenters/cards-game-presenter';
 import HydratedStateComponent from './HydratedState.vue';
 import InitialLoadingStateComponent from './InitialLoadingState.vue';
 
@@ -40,6 +40,9 @@ export default Vue.extend({
       this.state = state;
     });
     await this.presenter.init();
+  },
+  destroyed(): void {
+    this.presenter.destroy();
   },
 });
 </script>

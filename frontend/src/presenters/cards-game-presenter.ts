@@ -109,7 +109,6 @@ export function createCardGamePresenter(): CardGamePresenter {
       }
     },
     async startOver(): Promise<void> {
-
       const cards = await _loadCards(_initialDifficulty);
       _setState({
         ...(_state as HydratedState),
