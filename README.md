@@ -31,6 +31,7 @@ http://localhost:7071/app
 - The assignment did not specify the shape of the backend response. So the decision was made to include the solution with the generated random cards.
 - No specific deployment mechanism was required, so Docker containers ware used for portability.
 - There was no rule stating that card numbers should be unique, but the decision was made to ensure they are unique sense it seemed the sensible option.
+- No test coverage threshold was specified, so the tests are minimal to demonstrate the ability to write tests, stubs, spies... etc.
 
 ## Solution Architecture
 It's important to note that the backend server is the same server hosting the client static files. This is done to speed up the development. Ideally, the client files would be served by Nginx or a CDN in a production environment
