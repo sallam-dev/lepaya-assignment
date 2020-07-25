@@ -8,7 +8,7 @@ export const cardsGameRepo = {
       difficultyLevel,
     };
     const response: NewCardsResponse = await http.post(
-      'http://localhost:9090/api/new-cards',
+      '/api/new-cards',
       request
     );
     return {

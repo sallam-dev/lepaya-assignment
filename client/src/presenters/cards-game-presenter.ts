@@ -15,7 +15,6 @@ export function createCardGamePresenter(): CardGamePresenter {
   };
   let _solution: number[] = [];
 
-
   function _notifySubscribers() {
     _observers.forEach(fn => fn(_state));
   }
@@ -52,7 +51,7 @@ export function createCardGamePresenter(): CardGamePresenter {
       hideGameResult: true,
       userSolution: [],
       isWin: false,
-    }
+    };
   }
   async function _loadCards(difficultyLevel: DifficultyLevel): Promise<Card[]> {
     const gameCards = await cardsGameRepo.getNewCards(difficultyLevel);
@@ -124,6 +123,8 @@ export function createCardGamePresenter(): CardGamePresenter {
 
     subscribe(observer: (state: CardsGameState) => void): void {
       _observers.push(observer);
+      // eager notification
+      observer(_state);
     },
 
     destroy(): void {

@@ -35,7 +35,6 @@ export default Vue.extend({
     },
   },
   async created(): Promise<void> {
-    this.state = this.presenter.state;
     this.presenter.subscribe(state => {
       this.state = state;
     });

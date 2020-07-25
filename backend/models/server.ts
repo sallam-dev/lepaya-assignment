@@ -1,7 +1,6 @@
 export type Server = {
   registerJSONHandler(options: HandlerRegistrationOptions): Server;
-  registerSPARoutes(routes: SPARegistrationRoutes): Server;
-  useStatic(options: StaticFilesOptions): Server;
+  registerStaticRoute(routes: SPARegistrationRoutes): Server;
   init(): Promise<void>;
   shutdown(): Promise<void>;
 };
@@ -10,12 +9,9 @@ export type HandlerRegistrationOptions = {
   path: string;
   method: 'POST';
 };
-export type StaticFilesOptions = {
-  root: string;
-};
 export type SPARegistrationRoutes = Array<{
   url: string;
-  htmlPath: string;
+  directory: string;
 }>;
 
 export type ServerResponse = {

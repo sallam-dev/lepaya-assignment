@@ -7,7 +7,6 @@ import {
   createJSONResponse,
   createBadRequestResponse,
   ServerResponse,
-  StaticFilesOptions,
   SPARegistrationRoutes,
   Server,
   HandlerRegistrationOptions,
@@ -20,7 +19,6 @@ export function createServer(options: ServerOptions): Server {
   let _httpServer: http.Server;
   _app.use(bodyParser.json());
   _app.use(cors());
-
 
   const server: Server = {
     async init(): Promise<void> {
@@ -71,21 +69,10 @@ export function createServer(options: ServerOptions): Server {
       }
       return server;
     },
-    useStatic(options: StaticFilesOptions): Server {
-      _app.use(express.static(options.root));
-      return server;
-    },
-    registerSPARoutes(routes: SPARegistrationRoutes): Server {
-      _app.use(
-        history({
-          rewrites: routes.map(function ({ url, htmlPath }) {
-            return {
-              from: new RegExp(`^${url}`),
-              to: htmlPath,
-            };
-          }),
-        })
-      );
+    registerStaticRoute(routes: SPARegistrationRoutes): Server {
+      routes.forEach((route) => {
+        _app.use(route.url, express.static(route.directory));
+      });
       return server;
     },
   };

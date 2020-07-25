@@ -37,6 +37,9 @@ import { processGameCardsGenerationRequest } from './processors/game-card-genera
     path: '/api/new-cards',
     handler: processGameCardsGenerationRequest,
   });
+  server.registerStaticRoute([
+    { url: '/app', directory: __dirname + '/client' },
+  ]);
 
   await server.init();
 

@@ -175,7 +175,7 @@ main {
       place-items: center;
       grid-gap: 16px;
       grid-template-columns: repeat(4, 120px);
-      grid-auto-rows:  160px;
+      grid-auto-rows: 160px;
       .card {
         display: grid;
         place-items: center;
