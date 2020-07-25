@@ -7,9 +7,9 @@ import {
 } from '../models/game-card';
 
 export async function processGameCardsGenerationRequest(
-  request: unknown
+  request: GameCardsGenerationRequest
 ): Promise<GameCardsGenerationResponse> {
-  const { difficultyLevel } = request as GameCardsGenerationRequest;
+  const { difficultyLevel } = request;
   const cards = generateCards(difficultyLevel);
   const solution = generateSolution(cards);
   return {

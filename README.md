@@ -79,3 +79,4 @@ It's important to note that the backend server is the same server hosting the cl
 - Better CSS code in the vue components.
 - Might consider SSR depending on the need of the business.
 - Better error handling for the client
+- Setup the repository as a true Multi Package repository and adjust the configurations accordingly

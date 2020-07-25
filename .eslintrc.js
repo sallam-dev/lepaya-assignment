@@ -18,4 +18,12 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint'],
+  overrides: [
+    {
+      files: ['**/*.spec.ts'],
+      env: {
+        mocha: true,
+      },
+    },
+  ],
 };

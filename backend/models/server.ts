@@ -23,7 +23,7 @@ export type ServerRequest = {
   payload: unknown;
 };
 
-export type RequestHandler = (args: unknown) => Promise<unknown>;
+export type RequestHandler = (args: any) => Promise<unknown>;
 
 export function createJSONResponse(payload: unknown): ServerResponse {
   return {

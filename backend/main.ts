@@ -1,6 +1,6 @@
 import { createServer } from './server/server';
 import { logger } from './utilities/logger';
-import { processGameCardsGenerationRequest } from './processors/game-card-generation';
+import { processGameCardsGenerationRequest } from './processors/game-card-generation-processor';
 
 (async function main() {
   const server = createServer({ port: 9090 });
