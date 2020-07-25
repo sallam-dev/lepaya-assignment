@@ -1,8 +1,5 @@
 #!/bin/sh
 set +e
-cd ./client
-yarn run build
-
-cd ../
+yarn --cwd client run build
 yarn run build
 mv client/dist .build/client

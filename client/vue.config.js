@@ -1,4 +1,9 @@
 module.exports = {
   lintOnSave: false,
-  publicPath: '/app/'
+  publicPath: '/app/',
+
+  pwa: {
+    name: 'Lepaya Memory Game',
+    themeColor: '#FFFFFF'
+  }
 };
