@@ -41,9 +41,9 @@ describe('Cards Game Presenter', function() {
 
     await presenter.init();
 
-    sb.assert.calledOnceWithExactly(backendStub, {
-      difficulyLevel: 1
-    }, 'string');
+    sb.assert.calledOnceWithExactly(backendStub, '/api/new-cards',{
+      difficultyLevel: 1
+    });
     assert.equal(state.type, 'HYDRATED');
     assert.isFalse(state.disableGameSettings);
     assert.isTrue(state.hideGameResult);

@@ -55,7 +55,7 @@
 import Vue from 'vue';
 import { PropValidator } from 'vue/types/options';
 import { HydratedState, Card } from '../../presenters/cards-game-presenter';
-import { DifficultyLevel } from '../../../../backend/src/models/game-card';
+import { DifficultyLevel } from '../../models/cards-game';
 
 const events = {
   flipCard: 'flip-card',
